@@ -231,17 +231,17 @@ namespace Translator {
             else
             {
                 // Makes a copy of the collection so that we don't have to worry about the original substitution points being lost
-                return_me =  strings[name].copyInto(return_me);
+                StringCollection found =  strings[name];
 
-                foreach (StringType type in return_me.Keys)
+                foreach (StringType type in found.Keys)
                 {
-                    StringBuilder builder = new StringBuilder(return_me[type]);
+                    StringBuilder builder = new StringBuilder(found[type]);
 
                     Regex r1 = new Regex(@"%[A-za-z]*%", RegexOptions.IgnoreCase);
 
                     Regex r2 = new Regex(@"%[0-9]*", RegexOptions.IgnoreCase);
 
-                    Match m = r1.Match(return_me.ToString());
+                    Match m = r1.Match(builder.ToString());
                     int offset = 0;
                     while (m.Success)
                     {
@@ -259,7 +259,7 @@ namespace Translator {
                         m = m.NextMatch();
                     }
 
-                    m = r2.Match(return_me.ToString());
+                    m = r2.Match(builder.ToString());
                     offset = 0;
                     while (m.Success)
                     {

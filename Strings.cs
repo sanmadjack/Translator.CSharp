@@ -194,10 +194,10 @@ namespace Translator {
 
         public static string getString(StringType type, string name, params string[] variables)
         {
-            return get(name, variables)[type];
+            return getStrings(name, variables)[type];
         }
 
-        public static StringCollection get(string name, params string[] substitution_variables)
+        public static StringCollection getStrings(string name, params string[] substitution_variables)
         {
 
             StringCollection return_me = new StringCollection(name);

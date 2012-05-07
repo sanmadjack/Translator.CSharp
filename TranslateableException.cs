@@ -7,7 +7,7 @@ namespace Translator
 {
     public class TranslateableException: Exception
     {
-        string[] variables;
+        public readonly string[] variables;
         public TranslateableException(string name, Exception inner, params string[] variables): 
             base(name,inner)
         {

@@ -268,7 +268,7 @@ namespace Translator {
                             foreach (Capture c in g.Captures)
                             {
                                 Int64 key = Int64.Parse(c.Value.TrimStart('%'));
-                                if (substitution_variables[key] != null)
+                                if (substitution_variables.Length > key)
                                 {
                                     string line = substitution_variables[key];
                                     builder.Remove(c.Index + offset, c.Length);
@@ -289,7 +289,11 @@ namespace Translator {
                         m = m.NextMatch();
 
                     }
-                    return_me[type] = builder.ToString();
+                    string output = builder.ToString();
+                    if(output.Contains("\\n")) {
+                        output = output.Replace("\\n", Environment.NewLine);
+                    }
+                    return_me[type] = output;
                 }
             }
             return return_me;

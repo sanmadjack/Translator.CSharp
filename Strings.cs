@@ -136,11 +136,6 @@ namespace Translator {
             foreach (XmlNode node in nodes.ChildNodes) {
                 if (node.Name == "string") {
                     string name = node.Attributes["name"].InnerText;
-                    StringType type = StringType.General;
-                    if (node.Attributes["type"] != null)
-                    {
-                        type = ParseStringType(node.Attributes["type"].InnerText);
-                    }
                     StringCollection col;
                     // If the string is already present, then we assume that the new string supercedes the previous one
                     if (strings.ContainsKey(name))
@@ -152,14 +147,7 @@ namespace Translator {
                         col = new StringCollection(name);
                         strings.Add(name,col);
                     }
-                    if (col.ContainsKey(type))
-                    {
-                        col[type] = node.InnerText;
-                    }
-                    else
-                    {
-                        col.Add(type, node.InnerText);
-                    }
+                    col.addString(node);
                 }
             }
        
@@ -167,22 +155,24 @@ namespace Translator {
             
         }
 
-        public static string getInterfaceString(string name) {
+        public static TranslateableString getInterfaceString(string name) {
+
             if (name == null)
-                return "";
+                return new TranslateableString(name);
             // So, all interface translation strings are going to start with a dollar sign.
             // That way we can leave some interface elements alone
 
             if(name.StartsWith("$")) {
                 name = name.TrimStart('$');
-                return getGeneralString(name);
+                TranslateableString return_me = getString(StringType.Label, name);
+                return return_me;
             } else {
                 switch(name) {
                     case "-":
                     case ":":
-                        return name;
+                        return new TranslateableString(name);
                     default :
-                        return name;
+                        return new TranslateableString(name);
                 }
             }
         }
@@ -192,20 +182,32 @@ namespace Translator {
             return getString(StringType.General, name, variables);
         }
 
-        public static string getString(StringType type, string name, params string[] variables)
-        {
-            return getStrings(name, variables)[type];
+        public static TranslateableString getString(StringType type, string name) {
+            StringCollection strings = getStrings(name);
+            if (strings.ContainsKey(type))
+            {
+                return strings[type];
+            }
+            return new TranslateableString(name); 
         }
 
-        public static StringCollection getStrings(string name, params string[] substitution_variables)
+        public static string getString(StringType type, string name, params string[] variables)
         {
+            StringCollection strings = getStrings(name);
+            if(strings.ContainsKey(type)) {
+                return strings[type].interpret(variables);
+            }
+            return name;
+        }
 
-            StringCollection return_me = new StringCollection(name);
-            return_me.Add(StringType.General, "");
-
+        public static StringCollection getStrings(string name)
+        {
+            StringCollection error = new StringCollection(name);
             if (name == null)
-                return return_me;
-
+            {
+                error.Add(StringType.General, new TranslateableString("NULL NAME"));
+                return error;
+            }
 
 
             if (!strings.ContainsKey(name))
@@ -218,85 +220,17 @@ namespace Translator {
                     // So Windows wraps this exception in a WPF exception, which effectively hides this info
                     // from the average user. When breaking into debug in Visual Studio though, this allows us
                     // to see exactly which string is missing.
-                    return_me[StringType.General] = "STRING " + name + " NOT FOUND";
-                    //                            throw new Exception("Could not find string \"" + name + "\" in either the current language " + language + "-" + region + " or in the default string library");
+                    error.Add(StringType.General, new TranslateableString("STRING " + name + " NOT FOUND"));
                 }
                 else
                 {
                     // This will eventually become the only behavior when a string isn't found,
                     // so that the main interface will just display the name of a string
-                    return_me[StringType.General] = name;
-                }
+                    error.Add(StringType.General, new TranslateableString(name));
+                 }
+                return error;
             }
-            else
-            {
-                // Makes a copy of the collection so that we don't have to worry about the original substitution points being lost
-                StringCollection found =  strings[name];
-
-                foreach (StringType type in found.Keys)
-                {
-                    StringBuilder builder = new StringBuilder(found[type]);
-
-                    Regex r1 = new Regex(@"%[A-za-z]*%", RegexOptions.IgnoreCase);
-
-                    Regex r2 = new Regex(@"%[0-9]*", RegexOptions.IgnoreCase);
-
-                    Match m = r1.Match(builder.ToString());
-                    int offset = 0;
-                    while (m.Success)
-                    {
-                        foreach (Group g in m.Groups)
-                        {
-                            foreach (Capture c in g.Captures)
-                            {
-                                string key = c.Value.Trim('%');
-                                string line = getGeneralString(key);
-                                builder.Remove(c.Index + offset, c.Length);
-                                builder.Insert(c.Index + offset, line);
-                                offset += line.Length - c.Length;
-                            }
-                        }
-                        m = m.NextMatch();
-                    }
-
-                    m = r2.Match(builder.ToString());
-                    offset = 0;
-                    while (m.Success)
-                    {
-                        foreach (Group g in m.Groups)
-                        {
-                            foreach (Capture c in g.Captures)
-                            {
-                                Int64 key = Int64.Parse(c.Value.TrimStart('%'));
-                                if (substitution_variables.Length > key)
-                                {
-                                    string line = substitution_variables[key];
-                                    builder.Remove(c.Index + offset, c.Length);
-                                    builder.Insert(c.Index + offset, line);
-                                    offset += line.Length - c.Length;
-                                }
-                                else
-                                {
-                                    Logger.Logger.log("String " + name + " has  " + m.Groups.Count.ToString() + " variable slots, but "
-                                        + substitution_variables.Length.ToString() + " are being provided. Please adjust the translation file to accomodate this number of variables, which are as follows:");
-                                    foreach (string var in substitution_variables)
-                                    {
-                                        Logger.Logger.log(var);
-                                    }
-                                }
-                            }
-                        }
-                        m = m.NextMatch();
-
-                    }
-                    string output = builder.ToString();
-                    if(output.Contains("\\n")) {
-                        output = output.Replace("\\n", Environment.NewLine);
-                    }
-                    return_me[type] = output;
-                }
-            }
-            return return_me;
+            return strings[name];
 
         }
 
@@ -306,19 +240,5 @@ namespace Translator {
         }
 
 
-        private static StringType ParseStringType(string type)
-        {
-            switch (type)
-            {
-                case "title":
-                    return StringType.Title;
-                case "message":
-                    return StringType.Message;
-                case "general":
-                    return StringType.General;
-                default:
-                    throw new Exception("The string type " + type + " is not known");
-            }
-        }
     }
 }

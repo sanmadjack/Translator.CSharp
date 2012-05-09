@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
+using System.Xml;
 namespace Translator
 {
-    public class StringCollection: Dictionary<StringType,string>
+    public class StringCollection: Dictionary<StringType,TranslateableString>
     {
         string name;
         public StringCollection(string name)
@@ -13,22 +13,43 @@ namespace Translator
             this.name = name;
         }
 
-        public StringCollection copyInto(StringCollection here) {
-            foreach (StringType type in this.Keys)
+        public void addString(XmlNode node)
+        {
+            TranslateableString new_string;
+            StringType type = StringType.General;
+            string content = node.InnerText;
+
+            if (node.Attributes["type"] != null)
             {
-                if (here.ContainsKey(type))
-                    here[type] = this[type];
-                else
-                    here.Add(type, this[type]);
+                type = ParseStringType(node.Attributes["type"].InnerText);
             }
-            return here;
+
+            if (node.Attributes["hotkey"] != null)
+            {
+                new_string = new TranslateableString(content, node.Attributes["hotkey"].InnerText);
+            }
+            else
+            {
+                new_string = new TranslateableString(content);
+            }
+
+            if (this.ContainsKey(type))
+            {
+                this[type] = new_string;
+            }
+            else
+            {
+                this.Add(type, new_string);
+            }
+
+
         }
 
         public override string ToString()
         {
             if (this.ContainsKey(StringType.General))
             {
-                return this[StringType.General];
+                return this[StringType.General].ToString();
             }
             else
             {
@@ -36,6 +57,23 @@ namespace Translator
             }
 
         }
+                private static StringType ParseStringType(string type)
+        {
+            switch (type)
+            {
+                case "title":
+                    return StringType.Title;
+                case "message":
+                    return StringType.Message;
+                case "general":
+                    return StringType.General;
+                case "label":
+                    return StringType.Label;
+                default:
+                    throw new Exception("The string type " + type + " is not known");
+            }
+        }
+
 
     }
 }

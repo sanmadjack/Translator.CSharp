@@ -9,6 +9,7 @@ namespace Translator
     {
         General,
         Title,
-        Message
+        Message,
+        Label
     }
 }

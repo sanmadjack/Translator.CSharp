@@ -1,14 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Xml;
 using System.Xml.Schema;
 using System.IO;
 using System.Globalization;
 using System.Threading;
-using System.Text.RegularExpressions;
-using Logger;
 
 namespace Translator {
     public class Strings {
@@ -17,7 +13,7 @@ namespace Translator {
 
         private static string language_override = null;
 
-        private static Dictionary<string, StringCollection> strings = 
+        private static Dictionary<string, StringCollection> strings =
             new Dictionary<string, StringCollection>();
 
         private static XmlReaderSettings xml_settings;
@@ -25,18 +21,13 @@ namespace Translator {
         static Strings() {
             // Checks if the command line indicates we should be running in translation mode
             string[] args = Environment.GetCommandLineArgs();
-            for (int i = 0; i < args.Length; i++)
-            {
-                switch (args[i])
-                {
+            for (int i = 0; i < args.Length; i++) {
+                switch (args[i]) {
                     case "-language_file":
-                        if (args.Length > i + 1 && !args[i + 1].StartsWith("-"))
-                        {
+                        if (args.Length > i + 1 && !args[i + 1].StartsWith("-")) {
                             i++;
                             language_override = args[i];
-                        }
-                        else
-                        {
+                        } else {
                             Logger.Logger.log("No language file specified!");
                         }
                         break;
@@ -71,15 +62,13 @@ namespace Translator {
         }
 
         private static void loadRegion() {
-            if (language_override != null)
-            {
-                if (File.Exists(Path.Combine("Strings", language_override)))
-                {
+            if (language_override != null) {
+                if (File.Exists(Path.Combine("Strings", language_override))) {
                     loadFile(Path.Combine("Strings", language_override));
                 } else {
                     Logger.Logger.log("ERROR: CHOSEN STRINGS FILE " + language_override + " IS NOT PRESENT IN Strings FOLDER");
                 }
-                  return;
+                return;
             }
 
 
@@ -87,18 +76,14 @@ namespace Translator {
             // at least the user will still see something they can punch in to babelfish
             // If we're in translate mode, this is skipped, so that untranslated strings will
             // Show up as the string name rather than the translated string itself
-            if (File.Exists(Path.Combine("Strings", "en.xml")))
-            {
+            if (File.Exists(Path.Combine("Strings", "en.xml"))) {
                 loadFile(Path.Combine("Strings", "en.xml"));
-            }
-            else
-            {
+            } else {
                 Logger.Logger.log("ERROR: en.xml cannot be found! You probably need to re-install!");
             }
 
             // We start by checking for (and loading) a general string file for the current language
-            if (File.Exists(Path.Combine("Strings", language + ".xml")))
-            {
+            if (File.Exists(Path.Combine("Strings", language + ".xml"))) {
                 loadFile(Path.Combine("Strings", language + ".xml"));
 
             }
@@ -121,13 +106,11 @@ namespace Translator {
 
             try {
                 strings_xml.Load(parse_me);
-            }
-            catch (XmlException ex) {
+            } catch (XmlException ex) {
                 IXmlLineInfo info = parse_me as IXmlLineInfo;
                 Logger.Logger.log("The file " + file + " has produced this error:" + Environment.NewLine + ex.Message + Environment.NewLine + "The error is on or near line " + info.LineNumber + ", possibly at column " + info.LinePosition + "." + Environment.NewLine + "Go fix it.");
                 //throw new Exception("The file " + file + " has produced this error:" + Environment.NewLine + ex.Message + Environment.NewLine + "The error is on or near line " + info.LineNumber + ", possibly at column " + info.LinePosition + "." + Environment.NewLine + "Go fix it.");
-            }
-            finally {
+            } finally {
                 parse_me.Close();
             }
 
@@ -138,21 +121,26 @@ namespace Translator {
                     string name = node.Attributes["name"].InnerText;
                     StringCollection col;
                     // If the string is already present, then we assume that the new string supercedes the previous one
-                    if (strings.ContainsKey(name))
-                    {
+                    if (strings.ContainsKey(name)) {
                         col = strings[name];
-                    }
-                    else
-                    {
+                    } else {
                         col = new StringCollection(name);
-                        strings.Add(name,col);
+                        strings.Add(name, col);
                     }
                     col.addString(node);
                 }
             }
-       
 
-            
+
+
+        }
+        public static string getLabelString(string name, params string[] variables) {
+            if (name == null)
+                return "NULLNAME";
+
+            TranslateableString str = getString(StringType.Label, name);
+
+            return str.interpret(variables);
         }
 
         public static TranslateableString getInterfaceString(string name) {
@@ -162,72 +150,63 @@ namespace Translator {
             // So, all interface translation strings are going to start with a dollar sign.
             // That way we can leave some interface elements alone
 
-            if(name.StartsWith("$")) {
+            if (name.StartsWith("$")) {
                 name = name.TrimStart('$');
                 TranslateableString return_me = getString(StringType.Label, name);
                 return return_me;
             } else {
-                switch(name) {
+                switch (name) {
                     case "-":
                     case ":":
                         return new TranslateableString(name);
-                    default :
+                    default:
                         return new TranslateableString(name);
                 }
             }
         }
 
-        public static string getGeneralString(string name, params string[] variables)
-        {
+        public static string getGeneralString(string name, params string[] variables) {
             return getString(StringType.General, name, variables);
         }
 
         public static TranslateableString getString(StringType type, string name) {
             StringCollection strings = getStrings(name);
-            if (strings.ContainsKey(type))
-            {
+            if (strings.ContainsKey(type)) {
                 return strings[type];
             }
-            return new TranslateableString(name); 
+            return new TranslateableString(name);
         }
 
-        public static string getString(StringType type, string name, params string[] variables)
-        {
+        public static string getString(StringType type, string name, params string[] variables) {
             StringCollection strings = getStrings(name);
-            if(strings.ContainsKey(type)) {
+            if (strings.ContainsKey(type)) {
                 return strings[type].interpret(variables);
             }
             return name;
         }
 
-        public static StringCollection getStrings(string name)
-        {
+        public static StringCollection getStrings(string name) {
             StringCollection error = new StringCollection(name);
-            if (name == null)
-            {
+            if (name == null) {
                 error.Add(StringType.General, new TranslateableString("NULL NAME"));
                 return error;
             }
 
 
-            if (!strings.ContainsKey(name))
-            {
+            if (!strings.ContainsKey(name)) {
                 // If running in translate mode, then we'll throw an exception when a string is missing.
                 Logger.Logger.log("STRING " + name + " NOT FOUND");
-                if (language_override != null)
-                {
+                if (language_override != null) {
                     // This behavior will probably not stick, as most of the time this code occurs during GUI drawing,
                     // So Windows wraps this exception in a WPF exception, which effectively hides this info
                     // from the average user. When breaking into debug in Visual Studio though, this allows us
                     // to see exactly which string is missing.
                     error.Add(StringType.General, new TranslateableString("STRING " + name + " NOT FOUND"));
-                }
-                else
-                {
+                } else {
                     // This will eventually become the only behavior when a string isn't found,
                     // so that the main interface will just display the name of a string
                     error.Add(StringType.General, new TranslateableString(name));
-                 }
+                }
                 return error;
             }
             return strings[name];

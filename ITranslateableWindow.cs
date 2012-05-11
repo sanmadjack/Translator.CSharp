@@ -1,12 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
-namespace Translator
-{
-    public interface ITranslateableWindow
-    {
+namespace Translator {
+    public interface ITranslateableWindow {
         void setTranslatedTitle(string name, params string[] variables);
         bool displayQuestion(string title, string message);
         bool displayError(string title, string message);

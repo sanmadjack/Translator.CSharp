@@ -50,6 +50,8 @@ namespace Translator {
                     return StringType.General;
                 case "label":
                     return StringType.Label;
+                case "source":
+                    return StringType.Source;
                 default:
                     throw new Exception("The string type " + type + " is not known");
             }

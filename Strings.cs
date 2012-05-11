@@ -106,45 +106,39 @@ namespace Translator {
 
             try {
                 strings_xml.Load(parse_me);
+
+                XmlNodeList list = strings_xml.GetElementsByTagName("strings");
+                XmlNode nodes = list[0];
+                foreach (XmlNode node in nodes.ChildNodes) {
+                    if (node.Name == "string") {
+                        string name = node.Attributes["name"].InnerText;
+                        StringCollection col;
+                        // If the string is already present, then we assume that the new string supercedes the previous one
+                        if (strings.ContainsKey(name)) {
+                            col = strings[name];
+                        } else {
+                            col = new StringCollection(name);
+                            strings.Add(name, col);
+                        }
+                        col.addString(node);
+                    }
+                }
             } catch (XmlException ex) {
                 IXmlLineInfo info = parse_me as IXmlLineInfo;
                 Logger.Logger.log("The file " + file + " has produced this error:" + Environment.NewLine + ex.Message + Environment.NewLine + "The error is on or near line " + info.LineNumber + ", possibly at column " + info.LinePosition + "." + Environment.NewLine + "Go fix it.");
-                //throw new Exception("The file " + file + " has produced this error:" + Environment.NewLine + ex.Message + Environment.NewLine + "The error is on or near line " + info.LineNumber + ", possibly at column " + info.LinePosition + "." + Environment.NewLine + "Go fix it.");
+            } catch (Exception ex) {
+                Logger.Logger.log("The file " + file + " has produced this error:" + Environment.NewLine + ex.Message);
+                Logger.Logger.log(ex);
             } finally {
                 parse_me.Close();
             }
 
 
-            XmlNode nodes = strings_xml.GetElementsByTagName("strings")[0];
-            foreach (XmlNode node in nodes.ChildNodes) {
-                if (node.Name == "string") {
-                    string name = node.Attributes["name"].InnerText;
-                    StringCollection col;
-                    // If the string is already present, then we assume that the new string supercedes the previous one
-                    if (strings.ContainsKey(name)) {
-                        col = strings[name];
-                    } else {
-                        col = new StringCollection(name);
-                        strings.Add(name, col);
-                    }
-                    col.addString(node);
-                }
-            }
-
-
 
         }
-        public static string getLabelString(string name, params string[] variables) {
-            if (name == null)
-                return "NULLNAME";
 
-            TranslateableString str = getString(StringType.Label, name);
-
-            return str.interpret(variables);
-        }
 
         public static TranslateableString getInterfaceString(string name) {
-
             if (name == null)
                 return new TranslateableString(name);
             // So, all interface translation strings are going to start with a dollar sign.
@@ -165,14 +159,20 @@ namespace Translator {
             }
         }
 
-        public static string getGeneralString(string name, params string[] variables) {
-            return getString(StringType.General, name, variables);
+        public static string GetLabelString(string name, params string[] variables) {
+            TranslateableString str = getString(StringType.Label, name);
+            return str.interpret(variables);
         }
-
+        public static string GetMessageString(string name, params string[] variables) {
+            TranslateableString str = getString(StringType.Message, name);
+            return str.interpret(variables);
+        }
         public static TranslateableString getString(StringType type, string name) {
             StringCollection strings = getStrings(name);
             if (strings.ContainsKey(type)) {
                 return strings[type];
+            } else {
+                Logger.Logger.log("STRING " + name + " OF TYPE " + type.ToString() + " NOT FOUND");
             }
             return new TranslateableString(name);
         }
@@ -181,6 +181,8 @@ namespace Translator {
             StringCollection strings = getStrings(name);
             if (strings.ContainsKey(type)) {
                 return strings[type].interpret(variables);
+            } else {
+                Logger.Logger.log("STRING " + name + " OF TYPE " + type.ToString() + " NOT FOUND");
             }
             return name;
         }

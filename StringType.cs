@@ -4,6 +4,7 @@ namespace Translator {
         General,
         Title,
         Message,
-        Label
+        Label,
+        Source
     }
 }

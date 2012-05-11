@@ -42,7 +42,7 @@ namespace Translator {
                 foreach (Group g in m.Groups) {
                     foreach (Capture c in g.Captures) {
                         string key = c.Value.Trim('%');
-                        string line = Strings.getGeneralString(key);
+                        string line = Strings.getString(StringType.Source,key).interpret();
                         builder.Remove(c.Index + offset, c.Length);
                         builder.Insert(c.Index + offset, line);
                         offset += line.Length - c.Length;

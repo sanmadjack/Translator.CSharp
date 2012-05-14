@@ -5,6 +5,7 @@ namespace Translator {
         Title,
         Message,
         Label,
+        ToolTip,
         Source
     }
 }

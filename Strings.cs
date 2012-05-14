@@ -138,29 +138,28 @@ namespace Translator {
         }
 
 
-        public static TranslateableString getInterfaceString(string name) {
-            if (name == null)
-                return new TranslateableString(name);
+        public static StringCollection getInterfaceString(string name) {
+            StringCollection str;
             // So, all interface translation strings are going to start with a dollar sign.
             // That way we can leave some interface elements alone
-
-            if (name.StartsWith("$")) {
-                name = name.TrimStart('$');
-                TranslateableString return_me = getString(StringType.Label, name);
-                return return_me;
-            } else {
-                switch (name) {
-                    case "-":
-                    case ":":
-                        return new TranslateableString(name);
-                    default:
-                        return new TranslateableString(name);
+            if (name!=null&&name.StartsWith("$")) {
+                string real_name = name.TrimStart('$');
+                str = getStrings(real_name);
+                if (str.ContainsKey(StringType.Label)) {
+                    return str;
                 }
             }
+            str = new StringCollection(name);
+            str.Add(StringType.Label, new TranslateableString(name));
+            return str;
         }
 
         public static string GetLabelString(string name, params string[] variables) {
             TranslateableString str = getString(StringType.Label, name);
+            return str.interpret(variables);
+        }
+        public static string GetToolTipString(string name, params string[] variables) {
+            TranslateableString str = getString(StringType.ToolTip, name);
             return str.interpret(variables);
         }
         public static string GetMessageString(string name, params string[] variables) {

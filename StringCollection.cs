@@ -15,6 +15,8 @@ namespace Translator {
 
             if (node.Attributes["type"] != null) {
                 type = ParseStringType(node.Attributes["type"].InnerText);
+            } else {
+                Logger.Logger.log(node.OuterXml + " does not have a type attribute.");
             }
 
             if (node.Attributes["hotkey"] != null) {
@@ -52,6 +54,8 @@ namespace Translator {
                     return StringType.Label;
                 case "source":
                     return StringType.Source;
+                case "tooltip":
+                    return StringType.ToolTip;
                 default:
                     throw new Exception("The string type " + type + " is not known");
             }

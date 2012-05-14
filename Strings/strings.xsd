@@ -16,6 +16,7 @@
         <xs:enumeration value="label"/>
         <xs:enumeration value="title"/>
         <xs:enumeration value="message"/>
+        <xs:enumeration value="tooltip"/>
         <xs:enumeration value="source"/>
       </xs:restriction>
     </xs:simpleType>

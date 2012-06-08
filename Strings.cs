@@ -158,6 +158,10 @@ namespace Translator {
             TranslateableString str = getString(StringType.Label, name);
             return str.interpret(variables);
         }
+        public static string GetSourceString(string name, params string[] variables) {
+            TranslateableString str = getString(StringType.Source, name);
+            return str.interpret(variables);
+        }
         public static string GetToolTipString(string name, params string[] variables) {
             TranslateableString str = getString(StringType.ToolTip, name);
             return str.interpret(variables);

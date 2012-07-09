@@ -144,7 +144,11 @@ namespace Translator {
             // That way we can leave some interface elements alone
             if (name!=null&&name.StartsWith("$")) {
                 string real_name = name.TrimStart('$');
-                str = getStrings(real_name);
+                if (real_name.Contains("#")) {
+                    str = getStrings(real_name.Split('#')[0]);
+                } else {
+                    str = getStrings(real_name);
+                }
                 if (str.ContainsKey(StringType.Label)) {
                     return str;
                 }

@@ -18,6 +18,16 @@ namespace Translator {
 
         private static XmlReaderSettings xml_settings;
 
+        public static List<string> available_languages {
+            get {
+                List<String> files = new List<string>();
+                foreach(FileInfo file in new DirectoryInfo("Strings").GetFiles("*.xml")) {
+                    files.Add(file.Name.Remove(-4));
+                }
+                return files;
+            }
+        }
+
         static Strings() {
             // Checks if the command line indicates we should be running in translation mode
             string[] args = Environment.GetCommandLineArgs();

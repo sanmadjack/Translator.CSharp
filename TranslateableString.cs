@@ -40,6 +40,23 @@ namespace Translator {
             Match match;
             int offset;
 
+
+            match = subsitution_regex.Match(builder.ToString());
+            offset = 0;
+            while (match.Success) {
+                Group g = match.Groups[0];
+                Group key_g = match.Groups[1];
+                string key = key_g.Value;
+
+                string line = Strings.getString(StringType.Source, key).interpret();
+                builder.Remove(g.Index + offset, g.Length);
+                builder.Insert(g.Index + offset, line);
+                offset += line.Length - g.Length;
+
+                match = match.NextMatch();
+            }
+
+
             match = conditional_regex.Match(builder.ToString());
             offset = 0;
             while (match.Success) {
@@ -113,20 +130,6 @@ namespace Translator {
                 match = match.NextMatch();
             }
 
-            match = subsitution_regex.Match(builder.ToString());
-            offset = 0;
-            while (match.Success) {
-                Group g = match.Groups[0];
-                Group key_g = match.Groups[1];
-                string key = key_g.Value;
-
-                string line = Strings.getString(StringType.Source, key).interpret();
-                builder.Remove(g.Index + offset, g.Length);
-                builder.Insert(g.Index + offset, line);
-                offset += line.Length - g.Length;
-
-                match = match.NextMatch();
-            }
 
 
             string output = builder.ToString();

@@ -1,7 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Collections.Generic;
 namespace Translator {
     public class TranslateableString {
         public bool NotFound { get; protected set; }

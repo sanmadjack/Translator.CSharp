@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Threading;
 using System.Xml;
 using System.Xml.Schema;
-using System.IO;
-using System.Globalization;
-using System.Threading;
 
 namespace Translator {
     public class Strings {
@@ -21,7 +21,7 @@ namespace Translator {
         public static List<string> available_languages {
             get {
                 List<String> files = new List<string>();
-                foreach(FileInfo file in new DirectoryInfo("Strings").GetFiles("*.xml")) {
+                foreach (FileInfo file in new DirectoryInfo("Strings").GetFiles("*.xml")) {
                     files.Add(file.Name.Remove(-4));
                 }
                 return files;
@@ -152,7 +152,7 @@ namespace Translator {
             StringCollection str;
             // So, all interface translation strings are going to start with a dollar sign.
             // That way we can leave some interface elements alone
-            if (name!=null&&name.StartsWith("$")) {
+            if (name != null && name.StartsWith("$")) {
                 string real_name = name.TrimStart('$');
                 if (real_name.Contains("#")) {
                     str = getStrings(real_name.Split('#')[0]);

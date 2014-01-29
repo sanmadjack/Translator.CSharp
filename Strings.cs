@@ -168,6 +168,10 @@ namespace Translator {
             return str;
         }
 
+        public static string GetTitleString(string name, params string[] variables) {
+            TranslateableString str = getString(StringType.Title, name);
+            return str.interpret(variables);
+        }
         public static string GetLabelString(string name, params string[] variables) {
             TranslateableString str = getString(StringType.Label, name);
             return str.interpret(variables);

@@ -5,12 +5,12 @@ using System.Text.RegularExpressions;
 namespace Translator {
     public class TranslateableString {
         public bool NotFound { get; protected set; }
-        public string content { get; protected set; }
-        public string hotkey { get; protected set; }
+        public string Content { get; protected set; }
+        public string HotKey { get; protected set; }
 
         public bool HasHotKey {
             get {
-                return hotkey != null;
+                return HotKey != null;
             }
         }
 
@@ -27,12 +27,12 @@ namespace Translator {
         public TranslateableString(string content) : this(content, null) { }
 
         public TranslateableString(string content, string hotkey) {
-            this.content = content;
-            this.hotkey = hotkey;
+            this.Content = content;
+            this.HotKey = hotkey;
         }
 
         public string interpret(params string[] variables) {
-            return TranslateableString.interpret(content, variables);
+            return TranslateableString.interpret(Content, variables);
         }
 
         private static string interpret(string content, params string[] variables) {

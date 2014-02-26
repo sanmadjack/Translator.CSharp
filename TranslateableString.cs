@@ -10,7 +10,7 @@ namespace Translator {
 
         public bool HasHotKey {
             get {
-                return HotKey != null;
+                return !String.IsNullOrEmpty(HotKey);
             }
         }
 

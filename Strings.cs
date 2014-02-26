@@ -72,7 +72,7 @@ namespace Translator {
         }
 
         private static void loadRegion() {
-            if (language_override != null) {
+            if (!String.IsNullOrEmpty(language_override)) {
                 if (File.Exists(Path.Combine("Strings", language_override))) {
                     loadFile(Path.Combine("Strings", language_override));
                 } else {
@@ -152,7 +152,7 @@ namespace Translator {
             StringCollection str;
             // So, all interface translation strings are going to start with a dollar sign.
             // That way we can leave some interface elements alone
-            if (name != null && name.StartsWith("$")) {
+            if (!String.IsNullOrEmpty(name) && name.StartsWith("$")) {
                 string real_name = name.TrimStart('$');
                 if (real_name.Contains("#")) {
                     str = getStrings(real_name.Split('#')[0]);
@@ -210,7 +210,7 @@ namespace Translator {
 
         public static StringCollection getStrings(string name) {
             StringCollection error = new StringCollection(name);
-            if (name == null) {
+            if (String.IsNullOrEmpty(name)) {
                 error.Add(StringType.General, new TranslateableString("NULL NAME"));
                 return error;
             }
@@ -219,7 +219,7 @@ namespace Translator {
             if (!strings.ContainsKey(name)) {
                 // If running in translate mode, then we'll throw an exception when a string is missing.
                 Logger.Logger.log("STRING " + name + " NOT FOUND");
-                if (language_override != null) {
+                if (!String.IsNullOrEmpty(language_override)) {
                     // This behavior will probably not stick, as most of the time this code occurs during GUI drawing,
                     // So Windows wraps this exception in a WPF exception, which effectively hides this info
                     // from the average user. When breaking into debug in Visual Studio though, this allows us
